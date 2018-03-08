@@ -1,0 +1,16 @@
+<launch>
+<!--
+  <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
+    <arg name="sim" default="true"/>
+    <arg name="limited" default="true"/>
+  </include>
+
+   <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
+     <arg name="config" default="true"/>
+   </include>
+-->
+
+  <node name="move_group_interface_tutorial" pkg="moveit_tutorials" type="move_group_interface_tutorial" respawn="false" output="screen">
+  </node>
+
+</launch>
