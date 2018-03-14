@@ -51,8 +51,7 @@ void planCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& noth
 	ROS_INFO("SADSADSDADSADDASDDSASDSADSADSD");
 	
 	else
-	ROS_ERROR("SUCK A DICK!");
-	
+	ROS_ERROR("Something is better than nothing.");
         grabPlanned = true;
     }
     catch (tf2::TransformException &ex) {
