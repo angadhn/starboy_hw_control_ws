@@ -18,7 +18,7 @@
 
 <!-- Launch AR tracker package -->
   <!--include file="/home/angadhn/ar_track_alvar_setup/ar_track_alvar_bundle_setup.launch"/-->
-  <include file="$(find ar_track_alvar_setup)/ar_track_alvar_bundle_setup.launch"/>
+  <!-- include file="$(find ar_track_alvar_setup)/ar_track_alvar_bundle_setup.launch"/-->
 
   <!--node pkg="tf2_ros" type="static_transform_publisher" name="visp_cam_frame" args="0.07037199 0.02157724 -0.04618567 1.54113823 0.01996419 2.07645109 ee_link map" /-->
 

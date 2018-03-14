@@ -40,11 +40,15 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
-add_executable(move_group_visual_servo_tutorial src/move_group_visual_servo_tutorial.cpp)
-target_link_libraries(move_group_visual_servo_tutorial ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+#add_executable(move_group_visual_servo_tutorial src/move_group_visual_servo_tutorial.cpp)
+#target_link_libraries(move_group_visual_servo_tutorial ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(box_grabber_alvar_move_group src/box_grabber.cpp)
 target_link_libraries(box_grabber_alvar_move_group ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(pickAndPlace src/boxPickAndPlace.cpp)
+target_link_libraries(pickAndPlace ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
