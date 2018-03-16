@@ -15,6 +15,8 @@
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="box_grab_node" args="0.090 -0.083 0.32 -1.5707 1.5707 0.0 ar_marker_0 box_grab_frame" />
 
+  <node pkg="tf2_ros" type="static_transform_publisher" name="place_node" args="0.40  0.30 0.5 0 1.5707 0.0 base_link place_frame" />
+
   <node name="grabber" pkg="visual_servo_ur5_alvar_moveit" type="pickAndPlace" output="screen"/>
 
 </launch>

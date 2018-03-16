@@ -49,6 +49,8 @@ target_link_libraries(box_grabber_alvar_move_group ${catkin_LIBRARIES} ${Boost_L
 add_executable(pickAndPlace src/boxPickAndPlace.cpp)
 target_link_libraries(pickAndPlace ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_executable(Place src/place.cpp)
+target_link_libraries(Place ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}

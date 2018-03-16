@@ -5,10 +5,11 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /MotionPlanning1/Planning Request1
+        - /TF1
         - /TF1/Frames1
         - /MarkerArray1
       Splitter Ratio: 0.742560029
-    Tree Height: 158
+    Tree Height: 156
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -104,6 +105,26 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          leg1_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          leg2_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          leg3_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          leg4_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           right_inner_finger:
             Alpha: 1
             Show Axes: false
@@ -130,6 +151,11 @@ Visualization Manager:
             Show Trail: false
             Value: true
           shoulder_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_top_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -246,6 +272,26 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          leg1_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          leg2_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          leg3_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          leg4_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           right_inner_finger:
             Alpha: 1
             Show Axes: false
@@ -272,6 +318,11 @@ Visualization Manager:
             Show Trail: false
             Value: true
           shoulder_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          table_top_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -321,22 +372,16 @@ Visualization Manager:
           Value: true
         box_grab_frame:
           Value: true
+        box_prepare2grab_frame:
+          Value: true
         ee_link:
           Value: true
         forearm_link:
           Value: false
-        left_outer_finger:
-          Value: false
-        left_outer_knuckle:
-          Value: false
         map:
           Value: false
-        right_outer_finger:
-          Value: false
-        right_outer_knuckle:
-          Value: false
-        robotiq_arg2f_base_link:
-          Value: false
+        place_frame:
+          Value: true
         shoulder_link:
           Value: false
         tool0:
@@ -353,7 +398,7 @@ Visualization Manager:
           Value: false
         wrist_3_link:
           Value: false
-      Marker Scale: 1
+      Marker Scale: 0.300000012
       Name: TF
       Show Arrows: true
       Show Axes: true
@@ -364,6 +409,8 @@ Visualization Manager:
             base:
               tool0_controller:
                 {}
+            place_frame:
+              {}
             shoulder_link:
               upper_arm_link:
                 forearm_link:
@@ -375,8 +422,8 @@ Visualization Manager:
                             ar_marker_0:
                               box_grab_frame:
                                 {}
-                          robotiq_arg2f_base_link:
-                            {}
+                              box_prepare2grab_frame:
+                                {}
                         tool0:
                           {}
       Update Interval: 0
@@ -442,6 +489,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
+    Default Light: true
     Fixed Frame: world
     Frame Rate: 30
   Name: root
@@ -474,10 +522,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.294796884
+      Pitch: 0.424796879
       Target Frame: world
       Value: Orbit (rviz)
-      Yaw: 6.10997009
+      Yaw: 4.86496115
     Saved: ~
 Window Geometry:
   Displays:
@@ -491,11 +539,11 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002b8000003befc0200000008fb000000100044006900730070006c0061007900730100000028000000df000000dd00fffffffb0000000800480065006c00700000000342000000bb0000007600fffffffb0000000a00560069006500770073000000010b000000b0000000b000fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb0000002e004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d00200053006c00690064006500720000000000ffffffff0000004a00fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067010000010d000001d7000001cc00fffffffb0000002400570072006900730074002000430061006d00650072006100200049006d00610067006501000002ea000000fc0000001600ffffff00000466000003be00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b8000003befc0200000008fb000000100044006900730070006c0061007900730100000028000000dd000000dd00fffffffb0000000800480065006c00700000000342000000bb0000007600fffffffb0000000a00560069006500770073000000010b000000b0000000b000fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb0000002e004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d00200053006c00690064006500720000000000ffffffff0000004a00fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067010000010b000001d7000001cc00fffffffb0000002400570072006900730074002000430061006d00650072006100200049006d00610067006501000002e8000000fe0000001600ffffff000000e2000003be00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
-  Width: 1828
+  Width: 928
   Wrist Camera Image:
     collapsed: false
-  X: 92
+  X: 992
   Y: 24

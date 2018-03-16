@@ -22,7 +22,7 @@ moveit::planning_interface::MoveGroupInterface *move_group_ptr;
 moveit::planning_interface::MoveGroupInterface::Plan grabPlan;
 bool grabPlanned = false;
 tf::TransformListener *tfListener;
-geometry_msgs::PoseStamped preparePose, grabPose;//, placePose;
+//geometry_msgs::PoseStamped preparePose, grabPose;
 
 void planCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& nothing)
 //callback to preview plan
@@ -30,7 +30,7 @@ void planCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& noth
     ROS_INFO("Previewing plan to target");
     try{//basically create a target_pose with some desired conditions
         geometry_msgs::PoseStamped target_pose;// Create a target_pose
-        target_pose.header.frame_id="box_prepare2grab_frame";
+        target_pose.header.frame_id="place_frame";
         target_pose.header.stamp=ros::Time(0);
         target_pose.pose.orientation.x = 0;
         target_pose.pose.orientation.y = 0;
@@ -40,17 +40,15 @@ void planCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& noth
         target_pose.pose.position.y = 0;
         target_pose.pose.position.z = 0;
 
-	tfListener->transformPose("base_link", target_pose, preparePose);
-        target_pose.header.frame_id="box_grab_frame";
-	tfListener->transformPose("base_link", target_pose, grabPose);
-//        target_pose.header.frame_id="place_frame";
-//	tfListener->transformPose("base_link", target_pose, placePose);
+	//tfListener->transformPose("base_link", target_pose, preparePose);
+        //target_pose.header.frame_id="box_grab_frame";
+	//tfListener->transformPose("base_link", target_pose, grabPose);
 
         move_group_ptr->setMaxVelocityScalingFactor(.25);//velocityControl
-        move_group_ptr->setPoseTarget(preparePose);//assigns goal to planner
+        move_group_ptr->setPoseTarget(target_pose);//assigns goal to planner
         bool result = (move_group_ptr->plan(grabPlan)).val;//Equivalent to the 'plan' button in rviz
 	if (result)
-	ROS_INFO("SADSADSDADSADDASDDSASDSADSADSD");
+	ROS_INFO("Placement planned successfully.");
 	
 	else
 	ROS_ERROR("Something is better than nothing.");
@@ -67,26 +65,22 @@ void goalCallback(const geometry_msgs::PoseStamped::ConstPtr& markerPose)
     if(grabPlanned)
     {
         ROS_INFO("Moving...");
-        move_group_ptr->execute(grabPlan);//Equivalent to execute button in RViz's moveit plugin
         move_group_ptr->setMaxVelocityScalingFactor(.25);//velocityControl
-        move_group_ptr->setPoseTarget(grabPose);//assigns goal to planner
-        move_group_ptr->plan(grabPlan);//Equivalent to the 'plan' button in rviz
-        move_group_ptr->execute(grabPlan);
-        sendGripperMsg(255);//Close the gripper
-        move_group_ptr->setPoseTarget(preparePose);//assigns goal to planner
-        move_group_ptr->plan(grabPlan);//Equivalent to the 'plan' button in rviz
-        move_group_ptr->execute(grabPlan);
-//        move_group_ptr->setPoseTarget(placePose);//assigns goal to planner
+//        move_group_ptr->setPoseTarget(target_pose);//assigns goal to planner
+        move_group_ptr->execute(grabPlan);//Equivalent to execute button in RViz's moveit plugin
 //        move_group_ptr->plan(grabPlan);//Equivalent to the 'plan' button in rviz
 //        move_group_ptr->execute(grabPlan);
-
+        sendGripperMsg(0);//Open the gripper
+//        move_group_ptr->setPoseTarget(preparePose);//assigns goal to planner
+//        move_group_ptr->plan(grabPlan);//Equivalent to the 'plan' button in rviz
+//        move_group_ptr->execute(grabPlan);
     }
 }
 
 int main(int argc, char **argv) {
 //Initialize ROS
 // ^^^^^^^^^^^^^
-    ros::init(argc, argv,"pickAndPlaceNode");
+    ros::init(argc, argv,"placeNode");
     ros::NodeHandle node_handle;
     ros::AsyncSpinner spinner(1);
     spinner.start();
@@ -131,7 +125,7 @@ int main(int argc, char **argv) {
 //    visual_tools.loadRemoteControl();
 
     // open gripper
-    sendGripperMsg(0);
+    //sendGripperMsg(0);
 
     ros::Rate r(1); // 1 hz
     while(node_handle.ok())
