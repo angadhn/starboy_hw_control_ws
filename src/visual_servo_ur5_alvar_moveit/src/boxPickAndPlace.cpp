@@ -22,13 +22,79 @@ moveit::planning_interface::MoveGroupInterface *move_group_ptr;
 moveit::planning_interface::MoveGroupInterface::Plan grabPlan;
 bool grabPlanned = false;
 tf::TransformListener *tfListener;
-geometry_msgs::PoseStamped preparePose, grabPose;//, placePose;
+geometry_msgs::PoseStamped preparePose, grabPose, placePose;
+
+class Action
+{
+public:
+	static int GRIP;
+	static int MOTION;
+
+	Action(int _type, int _gripperPosition, geometry_msgs::PoseStamped _EEPose)
+	{
+		type = _type;
+		gripperPosition = _gripperPosition;
+		EEPose = _EEPose;
+	}
+
+	int type;
+	int gripperPosition;
+	geometry_msgs::PoseStamped EEPose;
+};
+
+int Action::GRIP = 0;
+int Action::MOTION = 1;
+
+int moveItErrorSuccess = 1;
+
+std::string moveItErrorCodeString(int val)
+{
+	switch(val)
+	{
+		case 1   : return "Success";
+		case -1  : return "Planning Failed";
+		case -2  : return "Invalid motion plan";
+		case -3  : return "Motion plan invalidated by environment change";
+		case -4  : return "Control failed";
+		case -5  : return "Unable to aquire sensor data";
+		case -6  : return "Timed out";
+		case -7  : return "Preempted";
+
+		case -10 : return "Start state in collision";
+		case -11 : return "Start state violates path constrains";
+		case -12 : return "Goal in collision";
+		case -13 : return "Goal violates path constraints";
+		case -14 : return "Goal constraints violated";
+		case -15 : return "Invalid group name";
+		case -16 : return "Invalid goal constraints";
+		case -17 : return "Invalid robot state";
+		case -18 : return "Invalid link name";
+		case -19 : return "Invalid object name";
+
+		case -21 : return "Frame transform failure";
+		case -22 : return "Collision checking unavailable";
+		case -23 : return "Robot state stale";
+		case -24 : return "Sensor info stale";
+
+		case -31 : return "No inverse kinematic solution";
+
+		default:   return "Non specific failure";
+	}
+}
+
+std::vector< Action > taskList;
+moveit::planning_interface::MoveGroupInterface::Plan currentPlan;
+bool currentPlannedOkay = false;
+int currentTask = 0;
 
 void planCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& nothing)
 //callback to preview plan
 {
     ROS_INFO("Previewing plan to target");
     try{//basically create a target_pose with some desired conditions
+	
+	taskList.clear();
+
         geometry_msgs::PoseStamped target_pose;// Create a target_pose
         target_pose.header.frame_id="box_prepare2grab_frame";
         target_pose.header.stamp=ros::Time(0);
@@ -39,22 +105,43 @@ void planCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& noth
         target_pose.pose.position.x = 0;
         target_pose.pose.position.y = 0;
         target_pose.pose.position.z = 0;
-
+	
+	// move to the prepare to grab pose
 	tfListener->transformPose("base_link", target_pose, preparePose);
+	taskList.push_back( Action(Action::MOTION, 0, preparePose) );
+
+	// move to the grab pose and grip the box
         target_pose.header.frame_id="box_grab_frame";
 	tfListener->transformPose("base_link", target_pose, grabPose);
-//        target_pose.header.frame_id="place_frame";
-//	tfListener->transformPose("base_link", target_pose, placePose);
+	taskList.push_back( Action(Action::MOTION, 0, grabPose) );
+	taskList.push_back( Action(Action::GRIP, 255, grabPose) );
+
+	// lift the box off the surface
+	taskList.push_back( Action(Action::MOTION, 0, preparePose) );
+
+	// move to the place pose and release the box
+        target_pose.header.frame_id="place_frame";
+	tfListener->transformPose("base_link", target_pose, placePose);
+	taskList.push_back( Action(Action::MOTION, 0, placePose) );
+	taskList.push_back( Action(Action::GRIP, 0, grabPose) );
+
+	// final motion back to the arms original position
+	taskList.push_back( Action(Action::MOTION, 0, move_group_ptr->getCurrentPose()) );
 
         move_group_ptr->setMaxVelocityScalingFactor(.25);//velocityControl
         move_group_ptr->setPoseTarget(preparePose);//assigns goal to planner
-        bool result = (move_group_ptr->plan(grabPlan)).val;//Equivalent to the 'plan' button in rviz
-	if (result)
-	ROS_INFO("SADSADSDADSADDASDDSASDSADSADSD");
-	
+        int result = (move_group_ptr->plan(currentPlan)).val;//Equivalent to the 'plan' button in rviz
+	if (result == moveItErrorSuccess)
+	{
+		ROS_INFO("First move planned Okay");
+		currentPlannedOkay = true;
+		currentTask = 0;
+	}
 	else
-	ROS_ERROR("Something is better than nothing.");
-        grabPlanned = true;
+	{
+		ROS_ERROR("Failed to plan first move [%s]", moveItErrorCodeString(result).c_str());
+		currentPlannedOkay = false;
+	}
     }
     catch (tf2::TransformException &ex) {
 	ROS_ERROR("Transform error %s", ex.what());
@@ -64,7 +151,71 @@ void planCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& noth
 void goalCallback(const geometry_msgs::PoseStamped::ConstPtr& markerPose)
 //callback for executing the plan on real robot
 {
-    if(grabPlanned)
+	if (currentPlannedOkay)
+	{
+		// execute the current task and plan
+		if (taskList[currentTask].type == Action::MOTION)
+		{
+			ROS_INFO("task [%d] Executing motion action.", currentTask);
+			int result = move_group_ptr->execute(currentPlan).val;
+			if (result == moveItErrorSuccess)
+				ROS_INFO("task [%d] Executed okay.", currentTask);
+			else
+			{
+				ROS_ERROR("task [%d] Failed to execute [%s]",
+					currentTask,
+					moveItErrorCodeString(result).c_str());
+				return;
+			}
+		}
+
+		if (taskList[currentTask].type == Action::GRIP)
+		{
+			ROS_INFO("task [%d] Executing gripper action.", currentTask);
+			sendGripperMsg(taskList[currentTask].gripperPosition);
+			ros::Duration(1.0).sleep();
+		}
+
+		// if that's the end of the task list
+		if (currentTask+1 == taskList.size())
+		{
+			ROS_INFO("task [%d] Completed execution of all tasks", currentTask);
+			currentPlannedOkay = false;
+			return;
+		}
+
+		// attempt to plan next move
+		++currentTask;
+		if (taskList[currentTask].type == Action::MOTION)
+		{
+			move_group_ptr->setMaxVelocityScalingFactor(.25);//velocityControl
+        		move_group_ptr->setPoseTarget(taskList[currentTask].EEPose);//assigns goal to planner
+        		int result = move_group_ptr->plan(currentPlan).val;
+			if (result == moveItErrorSuccess)
+			{
+				ROS_INFO("task [%d] Next motion task planned okay.", currentTask);
+				currentPlannedOkay = true;
+			}
+			else
+			{
+				ROS_ERROR("task [%d] Failed to plan next motion task [%s]",
+					currentTask,
+					moveItErrorCodeString(result).c_str());
+				currentPlannedOkay = false;
+			}
+		}
+
+		if (taskList[currentTask].type == Action::GRIP)
+		{
+			currentPlannedOkay = true;
+			ROS_INFO("task [%d] planned next grippper task.", currentTask);
+		}
+
+	}
+	else
+		ROS_WARN("Current move not planned, cannot execute it!");
+
+    /*if(grabPlanned)
     {
         ROS_INFO("Moving...");
         move_group_ptr->execute(grabPlan);//Equivalent to execute button in RViz's moveit plugin
@@ -76,11 +227,11 @@ void goalCallback(const geometry_msgs::PoseStamped::ConstPtr& markerPose)
         move_group_ptr->setPoseTarget(preparePose);//assigns goal to planner
         move_group_ptr->plan(grabPlan);//Equivalent to the 'plan' button in rviz
         move_group_ptr->execute(grabPlan);
-//        move_group_ptr->setPoseTarget(placePose);//assigns goal to planner
-//        move_group_ptr->plan(grabPlan);//Equivalent to the 'plan' button in rviz
-//        move_group_ptr->execute(grabPlan);
+        move_group_ptr->setPoseTarget(placePose);//assigns goal to planner
+        move_group_ptr->plan(grabPlan);//Equivalent to the 'plan' button in rviz
+        move_group_ptr->execute(grabPlan);
 
-    }
+    }*/
 }
 
 int main(int argc, char **argv) {
